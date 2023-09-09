@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- <script src="myscript.js"></script> -->
+</head>
+
+<body onload="time()">
+    <div class="container">
+        <div class="date-hour">
+            <p id="date">Date</p>
+            <p id="hours">Hours</p>
+        </div>
+
+        <header>
+            <h1>To Do list <img src="./images/checklist.png" alt="" width="30px"> </h1>
+            <div class="Select">
+                <select name="" id="filter-todo" class="select">
+                    <option value="All">All</option>
+                    <option value="Complete">Completed</option>
+                    <option value="InComplete">InComplete</option>
+                </select>
+            </div>
+        </header>
+
+
+
+        <form action="" id="add-task">
+            <p>Add your task here.</p>
+            <div class="input-data">
+                <div class="input-box">
+                    <input type="text" name="task" id="input-add" placeholder="Enter your task" required>
+                    <input type="date" id="due-date" name="due-date" required>
+                </div>
+
+                <div class="btn">
+                    <button type="submit" id="add-btn" class="btn-s"> Add Task</button>
+                </div>
+            </div>
+        </form>
+
+
+        <form action="" id="edit-task" class="hide">
+            <p>Edit your task here.</p>
+            <div class="input-data">
+                <div class="input-box">
+                    <input type="text" name="task" id="edit-input" placeholder="Enter your task">
+                    <input type="date" id="edit-date" name="due-date" required>
+                </div>
+                <div class="btn">
+                    <button type="submit" id="update-btn" class="btn-s">Update Task</button>
+                    <button type="submit" id="cancel-btn">Cancel</button>
+                </div>
+            </div>
+        </form>
+
+
+        <div class="to-do-list" id="todo-list">
+            <h3>Some Default Task</h3>
+
+        </div>
+    </div>
+
+    <script>
+        // Add an event listener to load tasks from local storage
+        document.addEventListener("DOMContentLoaded", () => {
+            loadTasks();
+        });
+
+        // date function
+        const date = Date.now();
+        const today = new Date(date);
+        document.getElementById('date').innerHTML = today.toDateString();
+
+        // time function
+        function time() {
+            const time = new Date();
+            let Hr = time.getHours();
+            let min = time.getMinutes();
+            let sec = time.getSeconds();
+
+            if (Hr < 10) {
+                Hr = '0' + Hr;
+            }
+            if (min < 10) {
+                min = '0' + min;
+            }
+            if (sec < 10) {
+                sec = '0' + sec;
+            }
+            document.getElementById('hours').innerHTML = Hr + ":" + min + ":" + sec;
+            setTimeout(time, 500);
+        }
+
+        // All variables used
+        let Addtask = document.querySelector("#add-task");
+        let Addinput = document.querySelector("#input-add");
+        let Duedate = document.querySelector("#due-date");
+        let Edittask = document.querySelector("#edit-task");
+        let Editinput = document.querySelector("#edit-input");
+        let dateInput = document.querySelector("#edit-date");
+        let task = document.querySelector("#todo-list");
+        let cancel = document.querySelector("#cancel-btn");
+        let filters = document.querySelector("#filter-todo");
+        let LastInput;
+        let lastdate;
+
+        // Load tasks from local storage
+        function loadTasks() {
+            const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            storedTasks.forEach((task) => {
+                const { text, date, completed } = task;
+                savetask(text, date, completed);
+            });
+        }
+
+        // Save tasks to local storage
+        function saveTasksToLocalStorage() {
+            const tasks = Array.from(task.querySelectorAll(".todo")).map((todo) => {
+                const todoTitle = todo.querySelector("h3").innerText;
+                const todoDate = todo.querySelector("date").innerText;
+                const completed = todo.classList.contains("done");
+                return { text: todoTitle, date: todoDate, completed };
+            });
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+        }
+
+        // Add task event listener
+        Addtask.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const ValueToAdd = Addinput.value;
+            const Date = Duedate.value;
+            if (ValueToAdd) {
+                savetask(ValueToAdd, Date, false);
+                saveTasksToLocalStorage();
+            }
+        });
+
+        // Save and display tasks
+        const savetask = (text, date, completed) => {
+            const todo = document.createElement("div");
+            todo.classList.add("todo");
+            todo.style.display = "flex";
+            todo.style.background = "white";
+            todo.style.color = "black";
+
+            const todoTitle = document.createElement("h3");
+            todoTitle.innerText = text;
+            todo.appendChild(todoTitle);
+
+            const D = document.createElement("date");
+            D.innerText = date;
+            todo.appendChild(D);
+
+            const completebtn = document.createElement("button");
+            completebtn.classList.add("Finish-todo");
+            completebtn.innerHTML = '<i class="fa-solid fa-circle-check fa-l"></i>';
+            todo.appendChild(completebtn);
+
+            const editbtn = document.createElement("button");
+            editbtn.classList.add("edit-todo");
+            editbtn.innerHTML = '<i class="fa-solid fa-pen fa-l edit-todo"></i>';
+            todo.appendChild(editbtn);
+
+            const Delete = document.createElement("button");
+            Delete.classList.add("remove-todo");
+            Delete.innerHTML = '<i class="fa-solid fa-trash fa-l">';
+            todo.appendChild(Delete);
+
+            if (completed) {
+                todo.classList.add("done");
+                completebtn.disabled = true;
+            }
+
+            task.appendChild(todo);
+            Addinput.value = "";
+            Addinput.focus();
+            Duedate.value = "";
+            Duedate.focus();
+        };
+
+        // For clicking completing task
+        document.addEventListener("click", (e) => {
+            const targetEl = e.target;
+
+            if (targetEl.classList.contains("Finish-todo")) {
+                const parentEl = targetEl.closest("div");
+                if (parentEl) {
+                    if (!targetEl.disabled) {
+                        parentEl.classList.toggle("done");
+                        targetEl.disabled = true;
+                        saveTasksToLocalStorage();
+                    }
+                }
+            }
+        });
+
+        // For clicking to delete task
+        document.addEventListener("click", (e) => {
+            const targetEl = e.target;
+
+            if (targetEl.classList.contains("remove-todo")) {
+                const parentEl = targetEl.closest("div");
+                if (parentEl) {
+                    parentEl.remove();
+                    saveTasksToLocalStorage();
+                }
+            }
+        });
+
+        
+        //  clicking for editing
+        document.addEventListener("click", (e) => {
+            const targetEl = e.target;
+            const parentEl = targetEl.closest("div");
+            let todoTitle;
+            let DATE;
+
+            if ((parentEl && parentEl.querySelector("h3")) && (parentEl && parentEl.querySelector("date"))) {
+                todoTitle = parentEl.querySelector('h3').innerHTML;
+                DATE = parentEl.querySelector('date').innerText;
+            }
+
+            if (targetEl.classList.contains("edit-todo")) {
+                // Check if the task is not complete before allowing editing
+                if (!parentEl.classList.contains("done")) {
+                    toggleForms();
+                    Editinput.value = todoTitle;
+
+                    d = new Date(DATE);
+                    var a = d.getFullYear() + '-' + (d.getMonth() + 1).toString().padStart(2, '0') + '-' + d.getDate().toString().padStart(2, '0');
+                    dateInput.value = a;
+
+                    LastInput = todoTitle;
+                    lastdate = DATE;
+                }
+            }
+        });
+
+
+
+
+
+
+
+
+        // For showing already input data
+        const toggleForms = () => {
+            Edittask.classList.toggle("hide");
+            Addtask.classList.toggle("hide");
+            task.classList.toggle("hide");
+        }
+
+        // For canceling editing task
+        cancel.addEventListener("click", (e) => {
+            e.preventDefault();
+            toggleForms();
+            Duedate.value = "";
+            Editinput.value = " ";
+        });
+
+        // Adding event listener to edit task field
+
+        Edittask.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const EditInputValue = Editinput.value;
+            const due_date = dateInput.value;
+            if (EditInputValue && due_date) {
+                update(EditInputValue, due_date);
+                toggleForms();
+                saveTasksToLocalStorage();
+            }
+        });
+
+        // Update task function
+        const update = (text, Date) => {
+            const todos = document.querySelectorAll(".todo");
+            todos.forEach((todo) => {
+                let todoTitle = todo.querySelector("h3");
+                let todoDate = todo.querySelector("date");
+
+                if (todoTitle.innerText === LastInput && todoDate.innerText === lastdate) {
+                    todoTitle.innerText = text;
+                    todoDate.innerText = Date;
+                }
+            });
+        }
+
+
+        // For filtering tasks from lists
+        filters.addEventListener("change", () => {
+            const selectedFilter = filters.value;
+            const todos = task.querySelectorAll(".todo");
+
+            todos.forEach((todo) => {
+                switch (selectedFilter) {
+                    case "Complete":
+                        if (todo.classList.contains("done")) {
+                            todo.style.display = "flex";
+                        } else {
+                            todo.style.display = "none";
+                        }
+                        break;
+                    case "InComplete":
+                        if (!todo.classList.contains("done")) {
+                            todo.style.display = "flex";
+                        } else {
+                            todo.style.display = "none";
+                        }
+                        break;
+                    default:
+                        todo.style.display = "flex";
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
