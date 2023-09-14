@@ -141,6 +141,12 @@
             }
         });
 
+        // Function to format the date as "mm/dd/yyyy"
+        function formatDate(date) {
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+            return new Date(date).toLocaleDateString(undefined, options);
+        }
+
         // Save and display tasks
         const savetask = (text, date, completed) => {
             const todo = document.createElement("div");
@@ -153,8 +159,11 @@
             todoTitle.innerText = text;
             todo.appendChild(todoTitle);
 
+            // const D = document.createElement("date");
+            // D.innerText = date;
+            // todo.appendChild(D);
             const D = document.createElement("date");
-            D.innerText = date;
+            D.innerText = formatDate(date); // Format the date here
             todo.appendChild(D);
 
             const completebtn = document.createElement("button");
@@ -185,11 +194,41 @@
         };
 
         // For clicking completing task
+        // document.addEventListener("click", (e) => {
+        //     const targetEl = e.target;
+
+        //     if (targetEl.classList.contains("Finish-todo")) {
+        //         const parentEl = targetEl.closest("div");
+        //         if (parentEl) {
+        //             if (!targetEl.disabled) {
+        //                 parentEl.classList.toggle("done");
+        //                 targetEl.disabled = true;
+        //                 saveTasksToLocalStorage();
+        //             }
+        //         }
+        //     }
+        // });
+
+        // For clicking to delete task
+        // document.addEventListener("click", (e) => {
+        //     const targetEl = e.target;
+
+        //     if (targetEl.classList.contains("remove-todo")) {
+        //         const parentEl = targetEl.closest("div");
+        //         if (parentEl) {
+        //             parentEl.remove();
+        //             saveTasksToLocalStorage();
+        //         }
+        //     }
+        // });
+
+
+        // For clicking completing task
         document.addEventListener("click", (e) => {
             const targetEl = e.target;
 
             if (targetEl.classList.contains("Finish-todo")) {
-                const parentEl = targetEl.closest("div");
+                const parentEl = targetEl.closest(".todo");
                 if (parentEl) {
                     if (!targetEl.disabled) {
                         parentEl.classList.toggle("done");
@@ -205,7 +244,7 @@
             const targetEl = e.target;
 
             if (targetEl.classList.contains("remove-todo")) {
-                const parentEl = targetEl.closest("div");
+                const parentEl = targetEl.closest(".todo");
                 if (parentEl) {
                     parentEl.remove();
                     saveTasksToLocalStorage();
@@ -213,7 +252,7 @@
             }
         });
 
-        
+
         //  clicking for editing
         document.addEventListener("click", (e) => {
             const targetEl = e.target;
